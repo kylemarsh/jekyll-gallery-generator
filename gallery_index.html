@@ -1,0 +1,8 @@
+---
+layout: default
+page_type: gallery
+---
+<h2>{{ page.title }}</h2>
+{% for image in page.images %}
+	<span class='image'><img src="/{{ image }}"></span>
+{% endfor %}
