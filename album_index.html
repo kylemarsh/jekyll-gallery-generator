@@ -3,6 +3,8 @@ layout: default
 page_type: album
 ---
 <h2>{{ page.title }}</h2>
+<div class='album-images'>
 {% for image in page.images %}
-	<span class='image'><img src="/{{ image }}"></span>
+	<a href="{{ image.rel_link }}"><img class="album-image" src="/{{ image.src }}"></a>
 {% endfor %}
+</div>
