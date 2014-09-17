@@ -7,5 +7,17 @@
 }
 
 .image {
-	max-width: 100%;
+	max-width: 90%;
+}
+
+.image-container {
+	width: 100%;
+}
+
+a.nav {
+	text-decoration: none;
+}
+
+.image-page {
+	text-align: center;
 }

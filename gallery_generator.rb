@@ -1,49 +1,80 @@
 module Jekyll
 	class ImagePage < Page
 		# An image page
-		def initialize(site, base, dir, name, image)
+		def initialize(site, base, dir, img_source, name, prev_name, next_name)
 			@site = site
 			@base = base
 			@dir = dir
 			@name = name # Name of the generated page
 
 			self.process(@name)
-			self.read_yaml(File.join(base, '_layouts'), 'image_page.html')
-			self.data['title'] = "#{image}"
-			self.data['img_src'] = image
+			self.read_yaml(File.join(@base, '_layouts'), 'image_page.html')
+			self.data['title'] = "#{File.basename(img_source)}"
+			self.data['img_src'] = img_source
+			self.data['prev_url'] = prev_name
+			self.data['next_url'] = next_name
+			self.data['album_url'] = @dir
 		end
 	end
 
 	class AlbumPage < Page
 		# An album page
 		#	Just a UL of images for now
-		def initialize(site, base, dir, parent)
+		def initialize(site, base, dir)
 			@site = site
-			@base = base
+			@base = base # Absolute path to use to find files for generation
+
+			# Page will be created at www.mysite.com/#{dir}/#{name}
 			@dir = dir
-			@name = 'index.html' # Name of the generated page
+			@name = 'index.html'
+
+			@album_source = File.join(site.config['album_dir'] || 'albums', @dir)
 
 			self.process(@name)
-			self.read_yaml(File.join(base, '_layouts'), 'album_index.html')
+			self.read_yaml(File.join(@base, '_layouts'), 'album_index.html')
 			self.data['title'] = "#{dir}"
 
 			self.data['images'] = []
-			d = Dir.open(File.join(parent, dir))
-			d.each do |file|
-				next if /^\.\.?/ =~ file
-				#TODO: Skip non-image files
-				ext = File.extname(file)
-				rel_link = "#{File.basename(file, ext)}_#{File.extname(file)[1..-1]}.html"
-				img_src = "#{File.join(d.path, file)}"
-				image_data = {
-					'src' => img_src,
-					'rel_link' => rel_link
-				}
-				self.data['images'] << image_data
 
-				# Create image page
-				site.pages << ImagePage.new(site, base, dir, rel_link, img_src)
+			files = list_images
+			files.each_with_index do |filename, idx|
+				prev_file = files[idx-1] unless idx == 0
+				next_file = files[idx+1] || nil
+
+				do_image(filename, prev_file, next_file)
 			end
+		end
+
+		def list_images
+			#FIXME: Skip non-image files
+			#FIXME: Skip directories
+			files = Dir.entries(@album_source)
+			files.reject! { |x| x =~ /^\./ } # Filter out ., .., and dotfiles
+			return files
+		end
+
+		def do_image(filename, prev_file, next_file)
+			# Get info for the album page and make the image's page.
+
+			rel_link = image_page_url(filename)
+			img_source = "#{File.join(@album_source, filename)}"
+
+			image_data = {
+				'src' => img_source,
+				'rel_link' => rel_link
+			}
+
+			self.data['images'] << image_data
+
+			# Create image page
+			site.pages << ImagePage.new(@site, @base, @dir, img_source,
+				rel_link, image_page_url(prev_file), image_page_url(next_file))
+		end
+
+		def image_page_url(filename)
+			return nil if filename == nil
+			ext = File.extname(filename)
+			return "#{File.basename(filename, ext)}_#{File.extname(filename)[1..-1]}.html"
 		end
 	end
 
@@ -56,8 +87,7 @@ module Jekyll
 				d = Dir.open(base_album_path)
 				d.each do |album|
 					next if /^\.\.?$/ =~ album
-					# TODO: split to recursive helper to handle sub-albums
-					site.pages << AlbumPage.new(site, site.source, album, d.to_path)
+					site.pages << AlbumPage.new(site, site.source, album)
 				end
 			end
 		end
