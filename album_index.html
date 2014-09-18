@@ -14,6 +14,6 @@ page_type: album
 	{% endif %}
 
 {% for image in page.images %}
-	<a href="{{ image.rel_link }}"><img class="album-image" src="/{{ image.src }}"></a>
+	<a href="{{ image.rel_link }}">{% image album_thumb {{image.src}} %}</a>
 {% endfor %}
 </div>

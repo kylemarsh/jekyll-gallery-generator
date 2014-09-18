@@ -7,7 +7,7 @@ layout: default
 	{% if page.prev_url %}
 	<a class="nav prev-button" href="{{ page.prev_url }}">&lt;</a>
 	{% endif %}
-	<img class="image" src="/{{ page.img_src }}">
+	<a href="/{{ page.img_src }}">{% image medium {{page.img_src}} %}</a>
 	{% if page.next_url %}
 	<a class="nav next-button" href="{{ page.next_url }}">&gt;</a>
 	{% endif %}
