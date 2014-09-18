@@ -35,8 +35,16 @@ module Jekyll
 			self.data['title'] = "#{dir}"
 
 			self.data['images'] = []
+			self.data['albums'] = []
 
-			files = list_images
+			files, directories = list_album_contents
+
+			directories.each do |subalbum|
+				albumpage = AlbumPage.new(site, site.source, File.join(@dir, subalbum))
+				self.data['albums'] << { 'name' => subalbum, 'url' => albumpage.url }
+				site.pages << albumpage #FIXME: sub albums are getting included in my gallery index
+			end
+
 			files.each_with_index do |filename, idx|
 				prev_file = files[idx-1] unless idx == 0
 				next_file = files[idx+1] || nil
@@ -45,12 +53,13 @@ module Jekyll
 			end
 		end
 
-		def list_images
+		def list_album_contents
 			#FIXME: Skip non-image files
-			#FIXME: Skip directories
-			files = Dir.entries(@album_source)
-			files.reject! { |x| x =~ /^\./ } # Filter out ., .., and dotfiles
-			return files
+			entries = Dir.entries(@album_source)
+			entries.reject! { |x| x =~ /^\./ } # Filter out ., .., and dotfiles
+			files = entries.reject { |x| File.directory? File.join(@album_source, x) } # Filter out directories
+			directories = entries.select { |x| File.directory? File.join(@album_source, x) } # Filter out non-directories
+			return files, directories
 		end
 
 		def do_image(filename, prev_file, next_file)
@@ -84,9 +93,10 @@ module Jekyll
 		def generate(site)
 			if site.layouts.key? 'album_index'
 				base_album_path = site.config['album_dir'] || 'albums'
-				d = Dir.open(base_album_path)
-				d.each do |album|
-					next if /^\.\.?$/ =~ album
+				albums = Dir.entries(base_album_path)
+				albums.reject! { |x| x =~ /^\./ }
+				albums.select! { |x| File.directory? File.join(base_album_path, x) }
+				albums.each do |album|
 					site.pages << AlbumPage.new(site, site.source, album)
 				end
 			end

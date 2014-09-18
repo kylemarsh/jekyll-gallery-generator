@@ -4,6 +4,15 @@ page_type: album
 ---
 <h2>{{ page.title }}</h2>
 <div class='album-images'>
+	{% if page.albums != empty %}
+	<h3>Sub-Albums</h3>
+	<ul>
+	{% for album in page.albums %}
+		<li><a href="{{ album.url }}">{{ album.name }}</a></li>
+	{% endfor %}
+	</ul>
+	{% endif %}
+
 {% for image in page.images %}
 	<a href="{{ image.rel_link }}"><img class="album-image" src="/{{ image.src }}"></a>
 {% endfor %}
