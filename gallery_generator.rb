@@ -29,13 +29,15 @@ module Jekyll
 			@name = 'index.html'
 
 			@album_source = File.join(site.config['album_dir'] || 'albums', @dir)
+			@album_metadata = get_album_metadata
 
 			self.process(@name)
 			self.read_yaml(File.join(@base, '_layouts'), 'album_index.html')
-			self.data['title'] = "#{dir}"
 
+			self.data['title'] = "#{dir}"
 			self.data['images'] = []
 			self.data['albums'] = []
+			self.data['description'] = @album_metadata['description']
 
 			files, directories = list_album_contents
 
@@ -53,12 +55,24 @@ module Jekyll
 			end
 		end
 
+		def get_album_metadata
+			['yml', 'yaml'].each do |ext|
+				config_file = File.join(@album_source, 'album_info.yml')
+				if File.exists? config_file
+					return YAML.load_file(config_file)
+				end
+			end
+			return {}
+		end
+
 		def list_album_contents
-			#FIXME: Skip non-image files
 			entries = Dir.entries(@album_source)
 			entries.reject! { |x| x =~ /^\./ } # Filter out ., .., and dotfiles
+
 			files = entries.reject { |x| File.directory? File.join(@album_source, x) } # Filter out directories
 			directories = entries.select { |x| File.directory? File.join(@album_source, x) } # Filter out non-directories
+
+			files.select! { |x| ['.png', '.jpg', '.gif'].include? File.extname(File.join(@album_source, x)) } # Filter out files that image-tag doesn't handle
 			return files, directories
 		end
 

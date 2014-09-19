@@ -4,6 +4,10 @@ page_type: album
 ---
 <h2>{{ page.title }}</h2>
 <div class='album-images'>
+	{% if page.description %}
+	<span class='album-description'>{{ page.description }}</span>
+	{% endif %}
+
 	{% if page.albums != empty %}
 	<h3>Sub-Albums</h3>
 	<ul>

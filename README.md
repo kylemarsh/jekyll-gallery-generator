@@ -1,7 +1,5 @@
 # jekyll-gallery-generator
 
-*JEKYLL GALLERY GENERATOR IS NOT COMPLETE AT THIS TIME*
-
 **Effortless Image Albums for Jekyll**
 
 Jekyll Gallery Generator is a plugin for the [Jekyll](http://jekyllrb.com)
@@ -70,16 +68,26 @@ If your `album_dir` is `"albums"` then this structure:
 | | |-IMG_123.jpg
 | | |-IMG_124.jpg
 | |-Family
+|   |-album_info.yml
+|   |-Mom_and_Dad_Anniversary.jpg
 |   |-Morgan.jpg
 |   |-Terry_and_Leslie.jpg
-|   |-Mom_and_Dad_Anniversary.jpg
 ```
 
 will build a gallery with two albums: "Some Event" and "Family".
 `http://mysite.com/Some Event/index.html` will show two images: `IMG_123.jpg`
 and `IMG_124.jpg`. Similarly, `http://mysite.com/Family/index.html` will show
 three images: `Morgan.jpg`, `Terri_and_Leslie.jpg`, and
-`Mom_and_Dad_Anniversary.jpg`. 
+`Mom_and_Dad_Anniversary.jpg`. The Family album has metadata about the album
+that it reads from album_info.yml.
+
+The data in album_info.yml is structured as a hash -- just like _config.yml --
+and affects the behavior of your album. Currently the only implemented metadata
+is "description" which becomes available to the album_index.html template.
+
+```YAML
+description: Lorem ipsum dolor hipster nonsense
+```
 
 ### Templates
 
