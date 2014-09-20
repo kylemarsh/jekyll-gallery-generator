@@ -19,7 +19,11 @@ module Jekyll
 
 	class AlbumPage < Page
 		# An album page
-		#	Just a UL of images for now
+
+		DEFAULT_METADATA = {
+			'sort' => 'filename asc',
+		}
+
 		def initialize(site, base, dir)
 			@site = site
 			@base = base # Absolute path to use to find files for generation
@@ -56,13 +60,15 @@ module Jekyll
 		end
 
 		def get_album_metadata
+			site_metadata = @site.config['album_config'] || {}
+			local_config = {}
 			['yml', 'yaml'].each do |ext|
 				config_file = File.join(@album_source, 'album_info.yml')
 				if File.exists? config_file
-					return YAML.load_file(config_file)
+					local_config = YAML.load_file(config_file)
 				end
 			end
-			return {}
+			return DEFAULT_METADATA.merge(site_metadata).merge(local_config)
 		end
 
 		def list_album_contents
@@ -73,6 +79,18 @@ module Jekyll
 			directories = entries.select { |x| File.directory? File.join(@album_source, x) } # Filter out non-directories
 
 			files.select! { |x| ['.png', '.jpg', '.gif'].include? File.extname(File.join(@album_source, x)) } # Filter out files that image-tag doesn't handle
+
+			# Sort images
+			def filename_sort(a, b, reverse)
+				if reverse =~ /^desc/
+					return b <=> a
+				end
+				return a <=> b
+			end
+
+			sort_on, sort_direction = @album_metadata['sort'].split
+			files.sort! { |a, b| send("#{sort_on}_sort", a, b, sort_direction) }
+
 			return files, directories
 		end
 

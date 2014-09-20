@@ -82,11 +82,18 @@ three images: `Morgan.jpg`, `Terri_and_Leslie.jpg`, and
 that it reads from album_info.yml.
 
 The data in album_info.yml is structured as a hash -- just like _config.yml --
-and affects the behavior of your album. Currently the only implemented metadata
-is "description" which becomes available to the album_index.html template.
+and affects the behavior of your album. Possible metadata keys are:
+
+- description: Text describing the album. Becomes available as
+`page.description` in the album_index.html template.
+- sort: string describing how to sort the images in the album. First word is
+the field to sort on, second is either 'asc' or 'desc'. Valid sort
+fields are:
+  - filename: sorts on the image's filename.
 
 ```YAML
 description: Lorem ipsum dolor hipster nonsense
+sort: filename desc
 ```
 
 ### Templates
