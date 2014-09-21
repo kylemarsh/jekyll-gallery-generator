@@ -3,21 +3,25 @@ layout: default
 page_type: album
 ---
 <h2>{{ page.title }}</h2>
-<div class='album-images'>
-	{% if page.description %}
-	<span class='album-description'>{{ page.description }}</span>
-	{% endif %}
+{% if page.description %}
+<span id='album-description'>{{ page.description }}</span>
+{% endif %}
 
+<div id="album-contents">
 	{% if page.albums != empty %}
-	<h3>Sub-Albums</h3>
-	<ul>
-	{% for album in page.albums %}
-		<li><a href="{{ album.url }}">{{ album.name }}</a></li>
-	{% endfor %}
-	</ul>
+	<div id='sub-albums'>
+		<h3>Sub-Albums</h3>
+		<ul>
+		{% for album in page.albums %}
+			<li><a href="{{ album.url }}">{{ album.name }}</a></li>
+		{% endfor %}
+		</ul>
+	</div>
 	{% endif %}
 
-{% for image in page.images %}
-	<a href="{{ image.rel_link }}">{% image album_thumb {{image.src}} %}</a>
-{% endfor %}
+	<div id="album-images">
+	{% for image in page.images %}
+		<a href="{{ image.rel_link }}">{% image album_thumb {{image.src}} %}</a>
+	{% endfor %}
+	</div>
 </div>

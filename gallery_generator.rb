@@ -42,12 +42,15 @@ module Jekyll
 			self.data['images'] = []
 			self.data['albums'] = []
 			self.data['description'] = @album_metadata['description']
+			self.data['hidden'] = true if @album_metadata['hidden']
 
 			files, directories = list_album_contents
 
 			directories.each do |subalbum|
 				albumpage = AlbumPage.new(site, site.source, File.join(@dir, subalbum))
-				self.data['albums'] << { 'name' => subalbum, 'url' => albumpage.url }
+				if !albumpage.data['hidden']
+					self.data['albums'] << { 'name' => subalbum, 'url' => albumpage.url }
+				end
 				site.pages << albumpage #FIXME: sub albums are getting included in my gallery index
 			end
 

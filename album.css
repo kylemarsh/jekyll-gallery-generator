@@ -1,9 +1,11 @@
-.album-image {
-	max-width: 20%;
+#album-description {}
+#album-images {}
+#album-contents {
+	width: 100%;
 }
 
-.album-images {
-	width: 100%;
+.album-image {
+	max-width: 20%;
 }
 
 .image {

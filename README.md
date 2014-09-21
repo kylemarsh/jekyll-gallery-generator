@@ -90,10 +90,15 @@ and affects the behavior of your album. Possible metadata keys are:
 the field to sort on, second is either 'asc' or 'desc'. Valid sort
 fields are:
   - filename: sorts on the image's filename.
+- hidden: boolean (true or false) indicating whether or not an album should be
+linked to from the gallery or parent albums. Hidden albums still exist in the
+site.pages list and are publicly accessible to anyone with the url, but don't
+get explicit links placed on parent albums' pages.
 
 ```YAML
 description: Lorem ipsum dolor hipster nonsense
 sort: filename desc
+hidden: false
 ```
 
 ### Templates
@@ -129,6 +134,7 @@ wherever you want the album list):
 <ul>
 {% for page in site.pages %}
     {% if page.page_type == 'album' %}
+		{% if page.hidden %}{% continue %}{% endif %}
         <li><a href="{{ page.url }}">{{ page.title }}</a></li>
     {% endif %}
 {% endfor %}
