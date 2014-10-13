@@ -24,4 +24,13 @@ page_type: album
 		<a href="{{ image.rel_link }}">{% image album_thumb {{image.src}} %}</a>
 	{% endfor %}
 	</div>
+
+	<div class=album-footer>
+		{% if page.prev_url %}
+		<a class="nav prev-button" href="{{ page.prev_url }}">&lt;Previous Page</a>
+		{% endif %}
+		{% if page.next_url %}
+		<a class="nav next-button" href="{{ page.next_url }}">Next Page&gt;</a>
+		{% endif %}
+	</div>
 </div>

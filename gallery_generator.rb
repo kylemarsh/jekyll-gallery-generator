@@ -1,7 +1,7 @@
 module Jekyll
 	class ImagePage < Page
 		# An image page
-		def initialize(site, base, dir, img_source, name, prev_name, next_name)
+		def initialize(site, base, dir, img_source, name, prev_name, next_name, album_page)
 			@site = site
 			@base = base
 			@dir = dir
@@ -13,7 +13,7 @@ module Jekyll
 			self.data['img_src'] = img_source
 			self.data['prev_url'] = prev_name
 			self.data['next_url'] = next_name
-			self.data['album_url'] = @dir
+			self.data['album_url'] = album_page
 		end
 	end
 
@@ -22,15 +22,16 @@ module Jekyll
 
 		DEFAULT_METADATA = {
 			'sort' => 'filename asc',
+			'paginate' => 50,
 		}
 
-		def initialize(site, base, dir)
+		def initialize(site, base, dir, page=0)
 			@site = site
 			@base = base # Absolute path to use to find files for generation
 
 			# Page will be created at www.mysite.com/#{dir}/#{name}
 			@dir = dir
-			@name = 'index.html'
+			@name = album_name_from_page(page)
 
 			@album_source = File.join(site.config['album_dir'] || 'albums', @dir)
 			@album_metadata = get_album_metadata
@@ -46,19 +47,38 @@ module Jekyll
 
 			files, directories = list_album_contents
 
-			directories.each do |subalbum|
-				albumpage = AlbumPage.new(site, site.source, File.join(@dir, subalbum))
-				if !albumpage.data['hidden']
-					self.data['albums'] << { 'name' => subalbum, 'url' => albumpage.url }
+			#Pagination
+			num_images = @album_metadata['paginate']
+			if num_images
+				first = num_images * page
+				last = num_images * page + num_images
+				self.data['prev_url'] = album_name_from_page(page-1) if page > 0
+				self.data['next_url'] = album_name_from_page(page+1) if last < files.length
+			end
+
+			if page == 0
+				directories.each do |subalbum|
+					albumpage = AlbumPage.new(site, site.source, File.join(@dir, subalbum))
+					if !albumpage.data['hidden']
+						self.data['albums'] << { 'name' => subalbum, 'url' => albumpage.url }
+					end
+					site.pages << albumpage #FIXME: sub albums are getting included in my gallery index
 				end
-				site.pages << albumpage #FIXME: sub albums are getting included in my gallery index
 			end
 
 			files.each_with_index do |filename, idx|
+				if num_images
+					next if idx < first
+					if idx >= last
+						site.pages << AlbumPage.new(site, base, dir, page + 1)
+						break
+					end
+				end
 				prev_file = files[idx-1] unless idx == 0
 				next_file = files[idx+1] || nil
 
-				do_image(filename, prev_file, next_file)
+				album_page = "#{@dir}/#{album_name_from_page(page)}"
+				do_image(filename, prev_file, next_file, album_page)
 			end
 		end
 
@@ -72,6 +92,10 @@ module Jekyll
 				end
 			end
 			return DEFAULT_METADATA.merge(site_metadata).merge(local_config)
+		end
+
+		def album_name_from_page(page)
+			return page == 0 ? 'index.html' : "index#{page + 1}.html"
 		end
 
 		def list_album_contents
@@ -97,7 +121,7 @@ module Jekyll
 			return files, directories
 		end
 
-		def do_image(filename, prev_file, next_file)
+		def do_image(filename, prev_file, next_file, album_page)
 			# Get info for the album page and make the image's page.
 
 			rel_link = image_page_url(filename)
@@ -112,7 +136,7 @@ module Jekyll
 
 			# Create image page
 			site.pages << ImagePage.new(@site, @base, @dir, img_source,
-				rel_link, image_page_url(prev_file), image_page_url(next_file))
+				rel_link, image_page_url(prev_file), image_page_url(next_file), album_page)
 		end
 
 		def image_page_url(filename)

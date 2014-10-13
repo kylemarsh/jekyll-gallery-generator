@@ -4,14 +4,15 @@ layout: default
 <h2>{{ page.title }}</h2>
 <div class='image-page'>
 	<span class="image-container">
-	{% if page.prev_url %}
-	<a class="nav prev-button" href="{{ page.prev_url }}">&lt;</a>
-	{% endif %}
-	<a href="/{{ page.img_src }}">{% image medium {{page.img_src}} %}</a>
-	{% if page.next_url %}
-	<a class="nav next-button" href="{{ page.next_url }}">&gt;</a>
-	{% endif %}
+		<a href="/{{ page.img_src }}">{% image medium {{page.img_src}} %}</a>
 	</span>
-	<br />
-	<span><a class="nav album-button" href="/{{ page.album_url }}">Back to Album</a></span>
+	<div class='image-footer'>
+		{% if page.prev_url %}
+		<a class="nav prev-button" href="{{ page.prev_url }}">&lt;Previous Image</a>
+		{% endif %}
+		<a class="nav album-button" href="/{{ page.album_url }}">Back to Album</a>
+		{% if page.next_url %}
+		<a class="nav next-button" href="{{ page.next_url }}">Next Image&gt;</a>
+		{% endif %}
+	</div>
 </div>
